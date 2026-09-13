@@ -8,17 +8,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Newsreader', 'Georgia', 'serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
       },
       borderRadius: {
         DEFAULT: '4px',
         sm: '2px',
         md: '4px',
         lg: '4px',
-        xl: '4px',
       },
       colors: {
-        // Status tokens strictly used as dot or 3px border accent
         status: {
           green: '#16a34a',
           yellow: '#ca8a04',
