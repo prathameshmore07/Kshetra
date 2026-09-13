@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Strict Minimalist Non-Negotiables */
+*, ::before, ::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Enforce max 2 font weights */
+.font-normal {
+  font-weight: 400;
+}
+.font-semibold, .font-bold, .font-medium {
+  font-weight: 600;
+}
+
+/* Enforce max 4px border-radius everywhere */
+*, button, input, select, textarea, div, span, modal, card {
+  border-radius: 4px;
+}
+
+/* Custom scrollbar - flat and minimal */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 2px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+
+/* WCAG Focus Rings */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #18181b !important;
+  outline-offset: 2px !important;
+}
+.dark a:focus-visible, .dark button:focus-visible, .dark input:focus-visible, .dark select:focus-visible, .dark textarea:focus-visible {
+  outline: 2px solid #f4f4f5 !important;
+  outline-offset: 2px !important;
+}
