@@ -253,7 +253,7 @@ export function EmergencyModal() {
                   Notice: In-Venue Support Only
                 </span>
                 <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  PulseOps is an in-venue coordination tool and <strong>is not a replacement for official local emergency services (112 / 911)</strong>. If you are experiencing a life-threatening medical event, fire, or acute crime, dial official services immediately.
+                  Kshetra is an in-venue coordination tool and <strong>is not a replacement for official local emergency services (112 / 911)</strong>. If you are experiencing a life-threatening medical event, fire, or acute crime, dial official services immediately.
                 </p>
               </div>
 

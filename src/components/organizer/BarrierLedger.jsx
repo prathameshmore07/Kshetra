@@ -57,7 +57,7 @@ export function BarrierLedger() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `pulseops-barrier-ledger-${event.id}.csv`);
+    link.setAttribute('download', `kshetra-barrier-ledger-${event.id}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -68,7 +68,7 @@ export function BarrierLedger() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(barrierLedger, null, 2));
     const link = document.createElement('a');
     link.setAttribute('href', dataStr);
-    link.setAttribute('download', `pulseops-barrier-ledger-${event.id}.json`);
+    link.setAttribute('download', `kshetra-barrier-ledger-${event.id}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

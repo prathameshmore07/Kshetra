@@ -5,11 +5,11 @@
 import { CACHED_EMERGENCY_CONTACTS } from '../data/seedData';
 
 const CACHE_KEYS = {
-  SAFETY_CONTACTS: 'pulseops_safety_contacts',
-  ZONE_STATUSES: 'pulseops_cached_zones',
-  FACILITIES: 'pulseops_cached_facilities',
-  LAST_SYNC_TIME: 'pulseops_safety_cache_timestamp',
-  SIMULATED_OFFLINE: 'pulseops_simulated_offline',
+  SAFETY_CONTACTS: 'kshetra_safety_contacts',
+  ZONE_STATUSES: 'kshetra_cached_zones',
+  FACILITIES: 'kshetra_cached_facilities',
+  LAST_SYNC_TIME: 'kshetra_safety_cache_timestamp',
+  SIMULATED_OFFLINE: 'kshetra_simulated_offline',
 };
 
 /**
@@ -66,5 +66,5 @@ export function isSimulatedOffline() {
 
 export function setSimulatedOffline(val) {
   localStorage.setItem(CACHE_KEYS.SIMULATED_OFFLINE, val ? 'true' : 'false');
-  window.dispatchEvent(new Event('pulseops_connectivity_change'));
+  window.dispatchEvent(new Event('kshetra_connectivity_change'));
 }

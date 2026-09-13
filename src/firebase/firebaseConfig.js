@@ -3,7 +3,7 @@
 
 export const getStoredFirebaseConfig = () => {
   try {
-    const raw = localStorage.getItem('pulseops_firebase_config');
+    const raw = localStorage.getItem('kshetra_firebase_config');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -12,9 +12,9 @@ export const getStoredFirebaseConfig = () => {
 
 export const saveFirebaseConfig = (config) => {
   if (!config) {
-    localStorage.removeItem('pulseops_firebase_config');
+    localStorage.removeItem('kshetra_firebase_config');
   } else {
-    localStorage.setItem('pulseops_firebase_config', JSON.stringify(config));
+    localStorage.setItem('kshetra_firebase_config', JSON.stringify(config));
   }
 };
 

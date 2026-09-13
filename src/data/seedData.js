@@ -276,7 +276,7 @@ export const INITIAL_SESSIONS = [
     accessibilityBase: 0.7,
     timeScore: 0.65,
     crowdScore: 0.55,
-    description: 'Why PulseOps rejects facial recognition and camera crowd monitoring in favor of transparent friction signals.',
+    description: 'Why Kshetra rejects facial recognition and camera crowd monitoring in favor of transparent friction signals.',
   },
   {
     id: 'session-5',
@@ -429,7 +429,7 @@ export const CACHED_EMERGENCY_CONTACTS = [
     badge: 'Venue Desk',
   },
   {
-    name: 'PulseOps Venue Medical Team (Dr. David Pinto)',
+    name: 'Kshetra Venue Medical Team (Dr. David Pinto)',
     phone: '+91 98200 44112',
     type: 'On-Site Rapid Response',
     badge: 'Direct Medic',

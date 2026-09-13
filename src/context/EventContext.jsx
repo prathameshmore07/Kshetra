@@ -27,15 +27,15 @@ import { ROUTE_DNA_PROFILES } from '../utils/recommendation';
 const EventContext = createContext(null);
 
 const STORAGE_KEYS = {
-  ZONES: 'pulseops_state_zones',
-  INCIDENTS: 'pulseops_state_incidents',
-  REPORTS: 'pulseops_state_reports',
-  LEDGER: 'pulseops_state_ledger',
-  STAFF: 'pulseops_state_staff',
-  PREFERENCES: 'pulseops_state_preferences',
-  BOOKMARKS: 'pulseops_state_bookmarks',
-  ROLE: 'pulseops_current_role',
-  LAST_SYNC: 'pulseops_last_sync_timestamp',
+  ZONES: 'kshetra_state_zones',
+  INCIDENTS: 'kshetra_state_incidents',
+  REPORTS: 'kshetra_state_reports',
+  LEDGER: 'kshetra_state_ledger',
+  STAFF: 'kshetra_state_staff',
+  PREFERENCES: 'kshetra_state_preferences',
+  BOOKMARKS: 'kshetra_state_bookmarks',
+  ROLE: 'kshetra_current_role',
+  LAST_SYNC: 'kshetra_last_sync_timestamp',
 };
 
 // Generate realistic short production ticket IDs (e.g. PO-8492)
@@ -210,12 +210,12 @@ export function EventProvider({ children }) {
 
     window.addEventListener('online', handleConnectivity);
     window.addEventListener('offline', handleConnectivity);
-    window.addEventListener('pulseops_connectivity_change', handleConnectivity);
+    window.addEventListener('kshetra_connectivity_change', handleConnectivity);
 
     return () => {
       window.removeEventListener('online', handleConnectivity);
       window.removeEventListener('offline', handleConnectivity);
-      window.removeEventListener('pulseops_connectivity_change', handleConnectivity);
+      window.removeEventListener('kshetra_connectivity_change', handleConnectivity);
     };
   }, [refreshSyncTimestamp]);
 
