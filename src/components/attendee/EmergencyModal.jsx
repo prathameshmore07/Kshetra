@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useEvent } from '../../context/EventContext';
+import { calculateFacilityWalkTime } from '../../utils/routeDna';
 import { StatusDot } from '../common/StatusIndicator';
-import { X, ShieldAlert, Phone, HelpCircle, UserCheck, AlertTriangle } from 'lucide-react';
+import { X, ShieldAlert, Phone, HelpCircle, UserCheck, AlertTriangle, MapPin } from 'lucide-react';
 
 export function EmergencyModal() {
   const {
@@ -10,6 +11,8 @@ export function EmergencyModal() {
     cachedContacts,
     submitFrictionReport,
     zones,
+    facilities,
+    preferences,
   } = useEvent();
 
   const [activeTier, setActiveTier] = useState('tier1'); // 'tier1' | 'tier2' | 'tier3'
@@ -52,6 +55,11 @@ export function EmergencyModal() {
     setTier2Result(res);
   };
 
+  // Real care & emergency facilities from store
+  const emergencyFacilities = facilities.filter(f =>
+    f.type === 'medical' || f.type === 'quiet' || f.type === 'help_desk'
+  );
+
   return (
     <div
       role="dialog"
@@ -65,7 +73,7 @@ export function EmergencyModal() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-red-600 shrink-0" />
             <h2 id="emergency-modal-title" className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Safety &amp; Emergency Assistance
+              Safety &amp; Emergency Protocols
             </h2>
           </div>
           <button
@@ -119,59 +127,54 @@ export function EmergencyModal() {
 
         {/* Tab Content */}
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
-          {/* TIER 1: GUIDANCE */}
+          {/* TIER 1: GUIDANCE (BOUND TO REAL FACILITIES STORE) */}
           {activeTier === 'tier1' && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
-                  On-Site Emergency &amp; Care Stations
+                  On-Site Emergency &amp; Care Stations (Live Facilities Data)
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Direct physical locations with trained medical &amp; security personnel:
+                  Walk times computed dynamically for your active {preferences.routeDna} Route DNA:
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <div tabIndex={0} className="p-3 border border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-[#16a34a] focus-visible:ring-2 focus-visible:ring-zinc-900">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                      Medical Tent &amp; First Aid Hub
-                    </span>
-                    <span className="text-[11px] text-zinc-500">2 min walk • Ground Floor</span>
-                  </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    Stationed with emergency paramedics, AED defibrillator, and oxygen support. Next to Skywalk East.
-                  </p>
-                </div>
+              <div className="space-y-2.5">
+                {emergencyFacilities.map(fac => {
+                  const zone = zones.find(z => z.id === fac.zoneId);
+                  const timeInfo = calculateFacilityWalkTime(fac, preferences.routeDna, zones);
 
-                <div tabIndex={0} className="p-3 border border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-[#16a34a] focus-visible:ring-2 focus-visible:ring-zinc-900">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                      Quiet Room (Zen Haven)
-                    </span>
-                    <span className="text-[11px] text-zinc-500">3 min walk • West Corridor</span>
-                  </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    Sensory regulation sanctuary for neurodivergent attendees or panic decompression. Dimmed, silent (&lt; 38 dB).
-                  </p>
-                </div>
-
-                <div tabIndex={0} className="p-3 border border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-[#16a34a] focus-visible:ring-2 focus-visible:ring-zinc-900">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                      Central Help Desk &amp; Security
-                    </span>
-                    <span className="text-[11px] text-zinc-500">1 min walk • Grand Pavilion Foyer</span>
-                  </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    Event marshals, wheelchair assistance dispatch, and lost attendee reunion point.
-                  </p>
-                </div>
+                  return (
+                    <div
+                      key={fac.id}
+                      tabIndex={0}
+                      className="p-3 border border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-[#16a34a] focus-visible:ring-2 focus-visible:ring-zinc-900"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                          {fac.name}
+                        </span>
+                        <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                          {timeInfo.minutes} min walk
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+                        <span>Zone: {zone?.name}</span>
+                        {zone && <StatusDot status={zone.status} />}
+                      </div>
+                      {timeInfo.hasDetour && (
+                        <span className="text-[10px] text-orange-600 dark:text-orange-400 block mt-1">
+                          {timeInfo.note}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* TIER 2: PRIVATE ASSISTANCE REQUEST */}
+          {/* TIER 2: PRIVATE ASSISTANCE REQUEST (WRITES TO ORGANIZER-ONLY STORE) */}
           {activeTier === 'tier2' && (
             <div className="space-y-4">
               <div className="border border-zinc-200 dark:border-zinc-800 p-3 bg-zinc-50 dark:bg-zinc-800/30">
@@ -179,7 +182,7 @@ export function EmergencyModal() {
                   Private &amp; Confidential Dispatch
                 </span>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  Sent directly to the lead organizer triage screen only. Never posted on public feeds or map overlays.
+                  Sent directly to organizer triage only. Never visible on public feeds, map overlays, or attendee timelines.
                 </p>
               </div>
 
@@ -189,7 +192,7 @@ export function EmergencyModal() {
                     Ticket: {tier2Result.ticketId}
                   </span>
                   <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 block">
-                    Private Request Dispatched to Command Desk
+                    Private Request Transmitted to Operations
                   </span>
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     A floor marshal or accessibility escort has been alerted for {tier2Result.zoneName}.
@@ -244,10 +247,9 @@ export function EmergencyModal() {
             </div>
           )}
 
-          {/* TIER 3: EMERGENCY ESCALATION */}
+          {/* TIER 3: EMERGENCY ESCALATION (CACHED OFFLINE CONTACTS) */}
           {activeTier === 'tier3' && (
             <div className="space-y-4">
-              {/* Mandatory Notice */}
               <div className="p-3 border border-red-300 dark:border-red-900 border-l-[3px] border-l-[#dc2626] bg-red-50/30 dark:bg-red-950/20">
                 <span className="text-xs font-semibold text-red-700 dark:text-red-400 block mb-1">
                   Notice: In-Venue Support Only
@@ -261,7 +263,7 @@ export function EmergencyModal() {
                 <div className="p-5 border border-zinc-200 dark:border-zinc-800 text-center space-y-3">
                   <AlertTriangle className="w-6 h-6 text-red-600 mx-auto" />
                   <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-sm mx-auto">
-                    Confirm to access cached offline direct emergency lines and alert on-site command.
+                    Confirm to view offline-cached direct emergency numbers for venue medical, security command, and national police/ambulance.
                   </p>
                   <button
                     onClick={() => setTier3Confirmed(true)}
