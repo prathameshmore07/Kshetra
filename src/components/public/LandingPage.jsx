@@ -8,73 +8,77 @@ import {
   Moon,
   Clock,
   Compass,
-  Check,
-  Building,
-  VolumeX,
-  FileCheck2,
   AlertTriangle,
+  Building,
+  Check,
+  Send,
+  UserCheck,
 } from 'lucide-react';
 
 export function LandingPage() {
   const { openLogin } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  // Interactive demo zone selector right in the hero preview
-  const [selectedDemoZone, setSelectedDemoZone] = useState('food-court');
+  // Interactive demo zone selector for hero map preview
+  const [activeZoneKey, setActiveZoneKey] = useState('ramp-west');
 
   const demoZones = {
-    'food-court': {
-      name: 'Food Court (Chai Concourse)',
-      status: 'orange',
-      reason: '18 reports in 8 min — chai counter queue spilling into central walkway',
-      wait: '18m wait',
-      action: 'Marshal Rajesh dispatched to deploy stanchions and route queue into eastern alcove',
-      affected: 18,
-    },
     'ramp-west': {
-      name: 'Ramp 2 West (Workshop A Connector)',
+      name: 'Ramp 2 West',
       status: 'red',
-      reason: 'Wheelchair ramp blocked by delivery crates — step-free access halted',
-      wait: 'Blocked',
-      action: 'Accessibility Lead Anita deployed to clear crates and verify incline clearance',
-      affected: 2,
+      tag: 'Accessibility Issue',
+      reportCount: 2,
+      reason: 'Red: Unloading crate blocking wheelchair ramp',
+      action: 'Deploy Anita Roy (Accessibility Lead) to clear path',
+      waitTime: 'Blocked',
+    },
+    'food-court': {
+      name: 'Food Court',
+      status: 'orange',
+      tag: 'Crowded Zone',
+      reportCount: 18,
+      reason: 'Orange: 18 reports in 8 min (queue spillover into walkway)',
+      action: 'Dispatch Rajesh Kadam to deploy stanchions at Chai counter',
+      waitTime: '18m wait',
     },
     'quiet-room': {
-      name: 'Quiet Room (Zen Haven)',
+      name: 'Quiet Room',
       status: 'green',
-      reason: 'Acoustic sanctuary operating nominal — ambient noise 34 dB',
-      wait: '0m wait',
-      action: 'No intervention needed — low-sensory sanctuary open',
-      affected: 0,
+      tag: 'Sensory Sanctuary',
+      reportCount: 0,
+      reason: 'Green: Calm sensory sanctuary, noise < 38 dB',
+      action: 'Nominal flow — whisper quiet operating condition',
+      waitTime: '0m wait',
     },
     'main-stage': {
-      name: 'Main Stage (Grand Pavilion)',
+      name: 'Main Stage',
       status: 'green',
-      reason: 'Flow nominal — seating at 62% capacity, 0 queue delay',
-      wait: '0m wait',
-      action: 'Routine scan time < 8s at entry doors',
-      affected: 0,
-    }
+      tag: 'Auditorium',
+      reportCount: 0,
+      reason: 'Green: Flow optimal, seating capacity at 62%',
+      action: 'Door scan rate < 8s, 0 queue delay',
+      waitTime: '0m wait',
+    },
   };
 
-  const activeZoneData = demoZones[selectedDemoZone];
+  const selectedZone = demoZones[activeZoneKey];
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors">
-      {/* Top Bar */}
+      {/* 1. NAV (Strict caveman: logo once, event name, sign-in buttons, dark toggle) */}
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-semibold tracking-tight text-base text-zinc-900 dark:text-zinc-50">
+            <span className="font-semibold tracking-tight text-sm text-zinc-900 dark:text-zinc-100">
               Kshetra
             </span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-normal">|</span>
+            <span className="text-zinc-300 dark:text-zinc-700">/</span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
               Mumbai Future Commons 2026
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
               aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
@@ -85,14 +89,14 @@ export function LandingPage() {
 
             <button
               onClick={() => openLogin('attendee')}
-              className="px-3.5 py-2 text-xs border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px] flex items-center justify-center font-medium"
+              className="px-3 py-2 text-xs border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px] flex items-center justify-center font-medium"
             >
               Attendee Sign-In
             </button>
 
             <button
               onClick={() => openLogin('organizer')}
-              className="px-4 py-2 text-xs bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 min-h-[44px] flex items-center justify-center"
+              className="px-3.5 py-2 text-xs bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 min-h-[44px] flex items-center justify-center"
             >
               Organizer Desk
             </button>
@@ -100,26 +104,18 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* Main Content Stream */}
+      {/* 2. HERO: ASYMMETRIC SPLIT (Left: Plain headline + subtext + CTAs | Right: Actual interactive map card) */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:py-12 space-y-16">
-        {/* HERO: Asymmetric Split (Headline + Pitch Left | Live Interactive Map Card Right) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left: Strong Concrete Pitch */}
-          <div className="lg:col-span-6 space-y-5">
+          {/* Left: What it does (No vibes, no buzzwords) */}
+          <div className="lg:col-span-6 space-y-4">
             <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
-              When 18 people report a queue in 8 minutes, the venue shouldn't stay green.
+              Attendees flag venue friction. Organizers resolve it against a timer.
             </h1>
 
-            <div className="space-y-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
-              <p>
-                Attendees flag blocked ramps, crowded halls, and sensory overload in 5 seconds.
-                Reports in the same zone automatically merge into one timed incident ticket.
-              </p>
-              <p>
-                Organizers get an explicit action, an assigned marshal, and a ticking stopwatch.
-                When resolved, the zone recovers and the duration is logged into a permanent Barrier Ledger.
-              </p>
-            </div>
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
+              A blocked wheelchair ramp re-routes mobility attendees immediately and alerts marshals with an assigned ticket.
+            </p>
 
             {/* CTAs */}
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -127,7 +123,7 @@ export function LandingPage() {
                 onClick={() => openLogin('attendee')}
                 className="px-5 py-3 bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors min-h-[44px] flex items-center justify-center gap-2"
               >
-                <span>Check In as Attendee</span>
+                <span>Attendee Check-In</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
@@ -135,45 +131,40 @@ export function LandingPage() {
                 onClick={() => openLogin('organizer')}
                 className="px-5 py-3 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] flex items-center justify-center gap-2"
               >
-                <span>Staff &amp; Dispatch Desk</span>
+                <span>Organizer Desk</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="pt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+            {/* Proof Line */}
+            <div className="pt-1 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <Building className="w-3.5 h-3.5 shrink-0" />
-              <span>Active live deployment: <strong>Mumbai Future Commons 2026</strong> (BKC)</span>
+              <span>Currently powering: <strong>Mumbai Future Commons 2026</strong> (Jio World Convention Centre, BKC)</span>
             </div>
           </div>
 
-          {/* Right: Real Interactive UI Preview (Live Map Inspector) */}
+          {/* Right: Actual Mini-Preview of Venue Map w/ Status Colors */}
           <div className="lg:col-span-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase text-zinc-400 tracking-wider">
-                  Live Venue Signal Monitor
-                </span>
-                <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
-                  Tap room to inspect
-                </span>
-              </div>
+              <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
+                Venue Map Mini-Preview (Tap room to inspect)
+              </span>
               <div className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="flex items-center gap-1"><StatusDot status="green" /> Nominal</span>
-                <span className="flex items-center gap-1"><StatusDot status="orange" /> High</span>
-                <span className="flex items-center gap-1"><StatusDot status="red" /> Blocked</span>
+                <span className="flex items-center gap-1"><StatusDot status="green" /> Green</span>
+                <span className="flex items-center gap-1"><StatusDot status="orange" /> Orange</span>
+                <span className="flex items-center gap-1"><StatusDot status="red" /> Red</span>
               </div>
             </div>
 
-            {/* Interactive Zone Buttons (Real Map State Simulator) */}
+            {/* Real 4-Room Grid with Real Statuses */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               {Object.entries(demoZones).map(([key, zone]) => {
-                const isSelected = selectedDemoZone === key;
+                const isSelected = activeZoneKey === key;
                 return (
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setSelectedDemoZone(key)}
+                    onClick={() => setActiveZoneKey(key)}
                     className={`p-2.5 text-left border transition-colors min-h-[48px] ${
                       isSelected
                         ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800'
@@ -181,251 +172,249 @@ export function LandingPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                        {zone.name.split('(')[0]}
+                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                        {zone.name}
                       </span>
                       <StatusDot status={zone.status} />
                     </div>
                     <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono block">
-                      {zone.status.toUpperCase()} • {zone.wait}
+                      {zone.status.toUpperCase()} • {zone.waitTime}
                     </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Selected Zone Reason Output Card */}
-            <div className={`p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 ${getStatusBorderClass(activeZoneData.status)} space-y-2`}>
+            {/* Zone Inspection Output */}
+            <div className={`p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 ${getStatusBorderClass(selectedZone.status)} space-y-1.5`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                  {activeZoneData.name}
+                  {selectedZone.name}
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.5 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 uppercase">
-                  Status: {activeZoneData.status}
+                  {selectedZone.tag}
                 </span>
               </div>
-
-              <div className="text-xs">
-                <span className="text-zinc-400 text-[11px] block mb-0.5 font-semibold">
-                  Why this color was triggered:
-                </span>
-                <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed font-mono text-[11px]">
-                  "{activeZoneData.reason}"
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700/60 text-xs">
-                <span className="text-zinc-400 text-[10px] uppercase font-mono block mb-0.5">
-                  Suggested Action:
-                </span>
-                <p className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-relaxed">
-                  {activeZoneData.action}
-                </p>
-              </div>
+              <p className="text-xs text-zinc-700 dark:text-zinc-300 font-mono leading-relaxed">
+                "{selectedZone.reason}"
+              </p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 pt-1 border-t border-zinc-200 dark:border-zinc-700/60">
+                Action: {selectedZone.action}
+              </p>
             </div>
           </div>
         </section>
 
-        {/* NARRATIVE SECTION 1: ATTENDEE 5-SECOND FLOW & TRANSPARENT ROUTE DNA */}
-        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-10 space-y-6">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-[11px] font-mono uppercase text-zinc-400 tracking-wider">
-              Product Walkthrough • Part 01
+        {/* 3. BELOW THE FOLD: SHOW THE PRODUCT (Actual UI screens in sequence, NO 2x2 icon cards) */}
+        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-10 space-y-10">
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase text-zinc-400">
+              The 4-Step Operational Sequence
             </span>
-            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              5-second tap flow. No forms. No accounts required to signal friction.
+            <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              From attendee signal to verified ledger entry
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
-              An attendee encountering a blocked wheelchair ramp taps one category button.
-              A real ticket ID is generated instantly, and every attendee with a mobility-friendly profile
-              is immediately routed around the blockage.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Real Ticket Output Preview */}
-            <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[3px] border-l-[#dc2626] space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono font-semibold px-2 py-0.5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
-                  PO-8492
+          <div className="space-y-6">
+            {/* STEP 1: The 1-Tap Friction Report UI */}
+            <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-zinc-500">01</span>
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    1-Tap Friction Signal (Attendee UI)
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">
+                  Attendee taps "Accessibility Issue" on Ramp 2 West. Ticket generated in under 5 seconds.
                 </span>
-                <span className="text-zinc-500 font-mono">Reported 4m 12s ago</span>
               </div>
-              <div>
-                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 block">
-                  Blocked Wheelchair Ramp (AV Delivery Crate)
-                </span>
-                <span className="text-xs text-zinc-500">Ramp 2 West • Workshop A Connector</span>
+
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs pt-1">
+                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-center">
+                  Blocked Path
+                </div>
+                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-center">
+                  Long Queue
+                </div>
+                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-center">
+                  Crowded Zone
+                </div>
+                <div className="p-2 border border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800 text-center font-semibold">
+                  ✓ Accessibility
+                </div>
+                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-center">
+                  Lost / Direction
+                </div>
+                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-center">
+                  Medical Aid
+                </div>
               </div>
-              <div className="p-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 text-xs">
-                <span className="text-[11px] text-zinc-500 block">Confidence Threshold:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                  High Confidence (Urgent accessibility flag verified on floor)
+
+              {/* Generated Ticket Result */}
+              <div className="p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-semibold px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+                    PO-8492
+                  </span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    Blocked Wheelchair Ramp (AV Crate Left in Path)
+                  </span>
+                </div>
+                <span className="font-mono text-zinc-500">
+                  Ramp 2 West • Affected Count: 2
                 </span>
               </div>
             </div>
 
-            {/* How Route DNA Responds */}
+            {/* STEP 2: Route DNA Personal Rerouting */}
             <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>Route DNA Navigation Impact</span>
-                </span>
-                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
-                  Live Dynamic Detour
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-zinc-500">02</span>
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    Route DNA Personal Reroute (Attendee Navigation)
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">
+                  Dynamic detours recomputed for every mobility and sensory profile.
                 </span>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 border-l-[3px] border-l-[#16a34a] space-y-1">
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 block">
-                    Mobility-Friendly Profile:
+                    Mobility-Friendly Route DNA:
                   </span>
-                  <p className="text-zinc-600 dark:text-zinc-400 text-[11px] mt-0.5">
+                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono text-[11px]">
                     "Rerouting via North Skywalk elevators (+3 min). Avoids Ramp 2 West blocked crate."
                   </p>
                 </div>
-                <div className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30">
+                <div className="p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 border-l-[3px] border-l-[#16a34a] space-y-1">
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 block">
-                    Fast Path Profile:
+                    Low-Sensory Route DNA:
                   </span>
-                  <p className="text-zinc-600 dark:text-zinc-400 text-[11px] mt-0.5">
-                    "Unchanged (uses central stairs, unaffected by wheelchair ramp obstruction)."
+                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono text-[11px]">
+                    "Bypasses Food Court concourse (85 dB Chai queue). Rerouting via quiet glass terrace."
                   </p>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* NARRATIVE SECTION 2: ORGANIZER VERIFY LOOP & BARRIER LEDGER */}
-        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-10 space-y-6">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-[11px] font-mono uppercase text-zinc-400 tracking-wider">
-              Product Walkthrough • Part 02
-            </span>
-            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              The Verify Loop: from detection to resolution delta.
-            </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
-              When an organizer clicks "Resolve Incident", Kshetra doesn't just dismiss a card.
-              It auto-recomputes the zone status, recalculates remaining reports, and logs the
-              exact start/ack/resolve timestamps to the Barrier Ledger.
-            </p>
-          </div>
-
-          {/* Real Mini Ledger Output */}
-          <div className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-x-auto">
-            <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-between text-xs">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
-                <FileCheck2 className="w-3.5 h-3.5" />
-                <span>Barrier Ledger — Live Audit Trail Preview</span>
-              </span>
-              <span className="font-mono text-[11px] text-zinc-500">100% verified timestamps</span>
-            </div>
-
-            <table className="w-full text-left text-xs border-collapse min-w-[620px]">
-              <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-semibold">
-                  <th className="p-2.5">Ticket</th>
-                  <th className="p-2.5">Zone</th>
-                  <th className="p-2.5">Duration</th>
-                  <th className="p-2.5">Resolution Delta</th>
-                  <th className="p-2.5">Staff Assigned</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 font-normal">
-                <tr>
-                  <td className="p-2.5 font-mono font-semibold text-zinc-900 dark:text-zinc-100">PO-1082</td>
-                  <td className="p-2.5 text-zinc-600 dark:text-zinc-400">Ramp 2 West</td>
-                  <td className="p-2.5 font-mono">4m 12s</td>
-                  <td className="p-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                    Reduced from RED to GREEN in 4 min
-                  </td>
-                  <td className="p-2.5 text-zinc-700 dark:text-zinc-300">Anita Roy</td>
-                </tr>
-                <tr>
-                  <td className="p-2.5 font-mono font-semibold text-zinc-900 dark:text-zinc-100">PO-3944</td>
-                  <td className="p-2.5 text-zinc-600 dark:text-zinc-400">Food Court Concourse</td>
-                  <td className="p-2.5 font-mono">7m 40s</td>
-                  <td className="p-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                    Reduced from ORANGE to YELLOW in 7 min
-                  </td>
-                  <td className="p-2.5 text-zinc-700 dark:text-zinc-300">Rajesh Kadam</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* NARRATIVE SECTION 3: QUIET MODE REAL ACOUSTIC COMPARISON */}
-        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-10 space-y-6">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-[11px] font-mono uppercase text-zinc-400 tracking-wider">
-              Product Walkthrough • Part 03
-            </span>
-            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Quiet Mode: route comparison without the sensory guessing game.
-            </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
-              Neurodivergent attendees or those experiencing panic decompression don't need a vague map icon.
-              They need a direct time vs decibel comparison and calm turn-by-turn guidance.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Direct Noisy Path */}
-            <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-700 dark:text-zinc-300">Direct Central Path</span>
-                <span className="font-mono text-zinc-500">3 min</span>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Cuts directly through Chai Concourse and main thoroughfare.
-              </p>
-              <span className="inline-block text-[11px] font-semibold text-orange-600 dark:text-orange-400 font-mono">
-                High Noise: 85 dB (crowded queue friction)
-              </span>
-            </div>
-
-            {/* Calm Route */}
-            <div className="p-4 border border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 border-l-[3px] border-l-[#16a34a] space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <VolumeX className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Calm Sanctuary Route</span>
+            {/* STEP 3: Live Incident Card with Stopwatch & Staff Dispatch */}
+            <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[3px] border-l-[#dc2626] space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-zinc-500">03</span>
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    Live Incident Triage Card (Organizer Dashboard)
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">
+                  Organizer receives correlated count, confidence score, assigned marshal, and live stopwatch.
                 </span>
-                <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">5 min (+2m)</span>
               </div>
-              <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                Diverts via North Skywalk and tactile acoustic buffer corridor.
-              </p>
-              <span className="inline-block text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
-                Low-Sensory: &lt; 42 dB (dimmed lighting, step-free)
-              </span>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-semibold px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
+                    PO-8492
+                  </span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    Blocked Wheelchair Ramp | Ramp 2 West
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-zinc-600 dark:text-zinc-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-zinc-400" />
+                    <span>04m 12s ago</span>
+                  </span>
+                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 border border-zinc-200 dark:border-zinc-700">
+                    In Progress
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-2.5 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-zinc-500 text-[11px]">Assigned Marshal: </span>
+                  <strong className="text-zinc-900 dark:text-zinc-100">Anita Roy (Accessibility Lead)</strong>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-500 font-mono">Affected Count: 2</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold font-mono">High Confidence</span>
+                </div>
+              </div>
+            </div>
+
+            {/* STEP 4: Barrier Ledger on Resolve (The Verify Loop Output) */}
+            <div className="p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-zinc-500">04</span>
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    The Barrier Ledger (Audit Log on Resolve)
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">
+                  Resolving clears the blockage, drops zone status from Red to Green, and logs exact duration.
+                </span>
+              </div>
+
+              <div className="border border-zinc-200 dark:border-zinc-800 overflow-x-auto text-xs">
+                <table className="w-full text-left border-collapse min-w-[580px]">
+                  <thead>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold text-[11px]">
+                      <th className="p-2">Ticket</th>
+                      <th className="p-2">Zone</th>
+                      <th className="p-2">Detected</th>
+                      <th className="p-2">Resolved</th>
+                      <th className="p-2">Duration</th>
+                      <th className="p-2">Resolution Delta</th>
+                      <th className="p-2">Officer</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 font-mono text-[11px]">
+                    <tr>
+                      <td className="p-2 font-semibold text-zinc-900 dark:text-zinc-100">PO-8492</td>
+                      <td className="p-2 text-zinc-700 dark:text-zinc-300">Ramp 2 West</td>
+                      <td className="p-2 text-zinc-500">11:55:10</td>
+                      <td className="p-2 text-zinc-500">11:59:22</td>
+                      <td className="p-2 font-semibold text-zinc-900 dark:text-zinc-100">4m 12s</td>
+                      <td className="p-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        Reduced from RED to GREEN in 4 min
+                      </td>
+                      <td className="p-2 text-zinc-700 dark:text-zinc-300">Anita Roy</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* BOTTOM CALL TO ACTION */}
-        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-10 pb-8 text-center space-y-4">
-          <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Ready to test live operations?
-          </h2>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Choose your view to test attendee friction submissions or organizer dispatch workflows.
-          </p>
-          <div className="flex items-center justify-center gap-3 pt-2">
+        {/* 4. FINAL CTA STRIP */}
+        <section className="border-t border-zinc-200 dark:border-zinc-800 pt-8 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Ready to test live operations?
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Sign in as an attendee to submit signals or as an organizer to triage tickets.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => openLogin('attendee')}
-              className="px-5 py-2.5 bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 min-h-[44px]"
+              className="px-4 py-2 text-xs border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px]"
             >
-              Attendee Check-In
+              Attendee Sign-In
             </button>
             <button
               onClick={() => openLogin('organizer')}
-              className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px]"
+              className="px-4 py-2 text-xs bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 font-semibold hover:bg-zinc-800 min-h-[44px]"
             >
               Organizer Desk
             </button>
@@ -433,17 +422,19 @@ export function LandingPage() {
         </section>
       </main>
 
-      {/* Minimalist Footer */}
+      {/* 5. FOOTER (Simple, not decorative, no fluff) */}
       <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-4 text-xs text-zinc-500 dark:text-zinc-400">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">Kshetra</span>
-            <span>— The Event's Nervous System</span>
+            <span>— The event's nervous system.</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>WCAG 2.1 AA Compliant</span>
-            <span>No Camera Facial Tracking</span>
-            <span>Algorithmic Transparency</span>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>Mumbai Future Commons 2026</span>
+            <span>•</span>
+            <span>WCAG 2.1 AA</span>
+            <span>•</span>
+            <span>Zero Camera Facial Tracking</span>
           </div>
         </div>
       </footer>
